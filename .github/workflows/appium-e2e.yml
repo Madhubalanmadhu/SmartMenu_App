@@ -108,10 +108,15 @@ jobs:
             echo "TC_FALLBACK,Global,E2E Automation,Android Emulator,Failed,$(date -u +%Y-%m-%dT%H:%M:%SZ),$(date -u +%Y-%m-%dT%H:%M:%SZ),0,\"The automated test run did not generate any report files.\"" >> excel.csv
           fi
 
-      - name: Upload Single Test Report (excel.csv)
-        if: always()
+      - name: Upload Test Reports and Logs
         uses: actions/upload-artifact@v4
+        if: always() # Upload reports even if tests fail
         with:
-          name: SmartMenu-E2E-Automation-Report
-          path: excel.csv
-          if-no-files-found: error
+          name: SmartMenu-E2E-Execution-Artifacts
+          path: |
+            excel.csv
+            appium-framework/reports/Mobile_E2E_Report.xlsx
+            appium-framework/reports/mochawesome/
+            appium-framework/reports/screenshots/
+            appium-framework/logs/
+          retention-days: 14
