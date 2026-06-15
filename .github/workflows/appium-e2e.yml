@@ -84,8 +84,7 @@ jobs:
             sleep 10
             
             # Execute tests
-            cd appium-framework
-            npm run test
+            cd appium-framework && npm run test
         env:
           USE_APK: 'true'
           APK_PATH: '../flutter_app/build/app/outputs/flutter-apk/app-debug.apk'
