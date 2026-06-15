@@ -9,7 +9,7 @@ on:
 
 jobs:
   appium-tests:
-    runs-on: macos-13 # macOS is required to run Android Emulators with hardware acceleration inside GHA
+    runs-on: ubuntu-latest
     
     steps:
       - name: Checkout Repository
@@ -30,6 +30,12 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -69,7 +75,24 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_6
-          script: bash run-tests.sh
+          script: |
+            cd appium-framework
+            
+            # Create logs directory if it doesn't exist
+            mkdir -p logs
+            
+            # Start Appium server in the background
+            appium --port 4723 --log-no-colors-theme > logs/appium-server.log 2>&1 &
+            
+            # Wait for Appium to start listening on port 4723
+            echo "Waiting for Appium server to start..."
+            until curl -s http://127.0.0.1:4723/status > /dev/null; do
+              sleep 2
+            done
+            echo "Appium server is up!"
+            
+            # Execute automated E2E tests via Mocha
+            npm test
         env:
           USE_APK: 'true'
           APK_PATH: '../flutter_app/build/app/outputs/flutter-apk/app-debug.apk'
