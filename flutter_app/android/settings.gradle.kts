@@ -1,3 +1,26 @@
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
+import java.security.cert.X509Certificate
+
+// Bypass SSL verification for restrictive network environments / antiviruses / proxies
+try {
+    val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
+        override fun getAcceptedIssuers(): Array<X509Certificate>? = null
+        override fun checkClientTrusted(certs: Array<X509Certificate>?, authType: String?) {}
+        override fun checkServerTrusted(certs: Array<X509Certificate>?, authType: String?) {}
+    })
+
+    val sc = SSLContext.getInstance("SSL")
+    sc.init(null, trustAllCerts, java.security.SecureRandom())
+    HttpsURLConnection.setDefaultSSLSocketFactory(sc.socketFactory)
+    HttpsURLConnection.setDefaultHostnameVerifier { _, _ -> true }
+} catch (e: Exception) {
+    e.printStackTrace()
+}
+
 pluginManagement {
     val flutterSdkPath =
         run {

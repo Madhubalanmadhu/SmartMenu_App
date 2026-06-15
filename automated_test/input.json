@@ -1,0 +1,10 @@
+{
+  "baseUrl": "http://127.0.0.1:50379",
+  "appiumServer": "http://127.0.0.1:4723",
+  "platformName": "Android",
+  "deviceName": "Android Device",
+  "appPackage": "com.example.flutter_app",
+  "appActivity": ".MainActivity",
+  "testEmail": "madhuhawk79@gmail.com",
+  "testPassword": "ikmdmad7"
+}

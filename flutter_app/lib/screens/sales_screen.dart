@@ -198,7 +198,7 @@ class _SalesScreenState extends State<SalesScreen> {
     final salesProvider = context.read<SalesProvider>();
     final analyticsProvider = context.read<AnalyticsProvider>();
     final menuProvider = context.read<MenuProvider>();
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['csv', 'xlsx', 'xls'],
       withData: true,

@@ -1,0 +1,27 @@
+# ==============================================================================
+# SMARTMENU E2E TESTING COMMANDS REFERENCE
+# ==============================================================================
+
+# Step 1: Check if the phone is connected via USB
+adb devices
+
+# Step 2: Uninstall old Appium settings to avoid conflicts
+adb uninstall io.appium.settings
+adb uninstall io.appium.uiautomator2.server
+adb uninstall io.appium.uiautomator2.server.test
+
+# Step 3: Rebuild the Flutter APK for the phone
+cd "S:\rest pdd\flutter_app"
+.\build_apk.ps1
+
+# Step 4: Start the Appium Server (Run in Terminal 1)
+# NOTE: Replace 'mmadh' with your Windows username in the path below
+$env:ANDROID_HOME="C:\Users\mmadh\AppData\Local\Android\Sdk"
+appium --port 4723
+
+# Step 5: Run the E2E Tests (Run in Terminal 2)
+# NOTE: Replace 'mmadh' with your Windows username in the path below
+cd "S:\rest pdd\appium-framework"
+$env:ANDROID_HOME="C:\Users\mmadh\AppData\Local\Android\Sdk"
+$env:USE_APK="true"
+npm run test

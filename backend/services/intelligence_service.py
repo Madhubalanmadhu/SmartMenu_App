@@ -962,8 +962,10 @@ def smart_dashboard(restaurant_id: int, db: Session, target_date: date | None = 
         prep_quantity = _safe_int(quantity * 1.08)
         unit_price = dish.selling_price or 0
         unit_cost = _unit_ingredient_cost(dish)
+        cost_missing = unit_cost is None
+        numeric_unit_cost = unit_cost if unit_cost is not None else 0
         margin_fraction = _prediction_margin(dish)
-        margin = None if margin_fraction is None else margin_fraction * 100
+        margin = 0 if margin_fraction is None else margin_fraction * 100
         risk = _waste_risk(quantity, prep_quantity, weather)
         dish_forecasts.append(
             {
@@ -974,9 +976,9 @@ def smart_dashboard(restaurant_id: int, db: Session, target_date: date | None = 
                 "next_week_quantity": base.get("next_week", quantity),
                 "preparation_quantity": prep_quantity,
                 "expected_sales": round(quantity * unit_price, 2),
-                "margin": None if margin is None else round(margin, 1),
-                "unit_cost": unit_cost,
-                "cost_status": "missing_cost" if unit_cost is None else "ok",
+                "margin": round(margin, 1),
+                "unit_cost": numeric_unit_cost,
+                "cost_status": "missing_cost" if cost_missing else "ok",
                 "waste_risk": risk,
                 "confidence": base.get("confidence", "ml_adjusted"),
                 "model": model_name,
@@ -1071,7 +1073,7 @@ def _local_chat_reply(message: str, context: dict) -> str:
         margin = selected.get("margin")
         margin_text = (
             "unknown because ingredient cost is missing"
-            if margin is None
+            if selected.get("cost_status") == "missing_cost"
             else f"{margin}%"
         )
         return (

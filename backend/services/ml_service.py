@@ -294,12 +294,14 @@ def analyze_profit(restaurant_id: int, db: Session):
         ).all()
         total_quantity = sum(row[0] or 0 for row in sold_rows)
         unit_cost = _unit_ingredient_cost(dish)
-        total_cost = None if unit_cost is None else total_quantity * unit_cost
+        cost_missing = unit_cost is None
+        numeric_unit_cost = unit_cost if unit_cost is not None else 0
+        total_cost = total_quantity * numeric_unit_cost
         total_revenue = sum(row[1] or 0 for row in sold_rows)
-        total_profit = None if total_cost is None else total_revenue - total_cost
         unit_price = dish.selling_price or 0
-        unit_profit = None if unit_cost is None else unit_price - unit_cost
-        margin = _prediction_margin(dish)
+        unit_profit = 0 if cost_missing else unit_price - numeric_unit_cost
+        total_profit = 0 if cost_missing else total_revenue - total_cost
+        margin = _prediction_margin(dish) or 0
 
         analysis.append({
             "dish_id": dish.id,
@@ -307,7 +309,7 @@ def analyze_profit(restaurant_id: int, db: Session):
             "total_sold": total_quantity,
             "batch_cost": dish.ingredient_cost or 0,
             "servings_per_batch": _servings_per_batch(dish),
-            "unit_cost": unit_cost,
+            "unit_cost": numeric_unit_cost,
             "unit_price": unit_price,
             "unit_profit": unit_profit,
             "total_cost": total_cost,
@@ -316,7 +318,7 @@ def analyze_profit(restaurant_id: int, db: Session):
             "total_profit": total_profit,
             "margin": margin,
             "menu_margin": margin,
-            "cost_status": "missing_cost" if unit_cost is None else "ok",
+            "cost_status": "missing_cost" if cost_missing else "ok",
         })
 
     # Sort by profit descending

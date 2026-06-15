@@ -1,0 +1,13 @@
+{
+  "timeout": 300000,
+  "reporter": "mochawesome",
+  "reporter-option": [
+    "reportDir=reports/mochawesome",
+    "reportFilename=mochawesome-report",
+    "html=true",
+    "json=true",
+    "overwrite=true"
+  ],
+  "ui": "bdd",
+  "spec": "tests/**/*.test.js"
+}

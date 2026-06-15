@@ -10,6 +10,8 @@ from models.waste import WasteEntry
 from schemas.user import UserCreate, RestaurantCreate, User as UserSchema, Restaurant as RestaurantSchema
 import firebase_admin
 from firebase_admin import auth, credentials
+import base64
+import json
 import os
 
 router = APIRouter()
@@ -37,14 +39,34 @@ def get_current_user(authorization: str = Header(None)):
     decoded = verify_firebase_token(token)
     return decoded
 
+def _dev_auth_bypass_enabled() -> bool:
+    return os.getenv("ALLOW_DEV_AUTH_BYPASS", "").lower() in {"1", "true", "yes"}
+
+
+def _decode_unverified_firebase_uid(token: str):
+    try:
+        payload = token.split(".")[1]
+        padding = "=" * (-len(payload) % 4)
+        decoded = base64.urlsafe_b64decode(payload + padding)
+        claims = json.loads(decoded)
+        return claims.get("user_id") or claims.get("sub") or claims.get("uid")
+    except Exception:
+        return None
+
+
 def verify_firebase_token(token: str):
     if not firebase_admin._apps:
-        # For development, return dummy uid
-        return {"uid": "dev-user-123"}
+        uid = _decode_unverified_firebase_uid(token) if _dev_auth_bypass_enabled() else None
+        # For development, return dummy uid if Firebase Admin is not configured.
+        return {"uid": uid or "dev-user-123"}
     try:
         decoded_token = auth.verify_id_token(token)
         return decoded_token
     except Exception as e:
+        if _dev_auth_bypass_enabled():
+            uid = _decode_unverified_firebase_uid(token)
+            if uid:
+                return {"uid": uid}
         raise HTTPException(status_code=401, detail="Invalid token")
 
 def get_current_db_user(current_user: dict, db: Session) -> User:

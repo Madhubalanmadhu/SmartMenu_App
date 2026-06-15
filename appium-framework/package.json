@@ -1,0 +1,18 @@
+{
+  "name": "smartmenu-appium-framework",
+  "version": "1.0.0",
+  "description": "Enterprise Appium E2E Automation Framework for Android Application (Node.js)",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --config .mocharc.json tests/**/*.test.js"
+  },
+  "dependencies": {
+    "chai": "^4.4.1",
+    "dotenv": "^16.4.5",
+    "exceljs": "^4.4.0",
+    "mocha": "^10.4.0",
+    "mochawesome": "^7.1.3",
+    "selenium-webdriver": "^4.20.0",
+    "winston": "^3.13.0"
+  }
+}

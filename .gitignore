@@ -21,7 +21,16 @@ __pycache__/
 # Flutter/Dart
 flutter_app/.dart_tool/
 flutter_app/build/
+build/
 flutter_app/.flutter-plugins-dependencies
+
+# Firebase hosting cache
+.firebase/
+
+# Demo Android app local/generated files
+demo_android_app/local.properties
+demo_android_app/app/build/
+demo_android_app/.gradle/
 
 # IDE/system
 .vscode/
@@ -35,3 +44,7 @@ smartmenu_sales_data_*.csv
 
 # Nested generated Android build output
 flutter_app/android/build/
+
+# Node dependency directories
+node_modules/
+**/node_modules/
