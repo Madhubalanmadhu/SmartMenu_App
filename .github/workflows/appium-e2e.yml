@@ -76,23 +76,11 @@ jobs:
           arch: x86_64
           profile: pixel_6
           script: |
-            cd appium-framework
-            
-            # Create logs directory if it doesn't exist
-            mkdir -p logs
-            
-            # Start Appium server in the background
-            appium --port 4723 --log-no-colors-theme > logs/appium-server.log 2>&1 &
-            
-            # Wait for Appium to start listening on port 4723
+            cd appium-framework && mkdir -p logs && appium --port 4723 --log-no-colors-theme > logs/appium-server.log 2>&1 &
             echo "Waiting for Appium server to start..."
-            until curl -s http://127.0.0.1:4723/status > /dev/null; do
-              sleep 2
-            done
+            until curl -s http://127.0.0.1:4723/status > /dev/null; do sleep 2; done
             echo "Appium server is up!"
-            
-            # Execute automated E2E tests via Mocha
-            npm test
+            cd appium-framework && npm test
         env:
           USE_APK: 'true'
           APK_PATH: '../flutter_app/build/app/outputs/flutter-apk/app-debug.apk'
