@@ -32,17 +32,30 @@ const testCases = [
   { id: 'TC_27', module: 'Gestures', title: 'Should perform scroll down actions on data list views' },
   { id: 'TC_28', module: 'Gestures', title: 'Should swipe horizontally to switch navigation contexts' },
   { id: 'TC_29', module: 'Gestures', title: 'Should perform a long press gesture on dashboard metrics cards' },
-  { id: 'TC_30', module: 'Performance', title: 'Should benchmark application session startup latency' }
+  { id: 'TC_30', module: 'Performance', title: 'Should benchmark application session startup latency' },
+  { id: 'TC_31', module: 'Performance', title: 'Should benchmark transition screen load latency for Analytics tab data' },
+  { id: 'TC_32', module: 'Performance', title: 'Should stress-test system responsiveness under rapid consecutive clicks' },
+  { id: 'TC_33', module: 'Security', title: 'Should enforce password field masking during credentials input' },
+  { id: 'TC_34', module: 'Security', title: 'Should restrict access to dashboard screens for unauthenticated users' },
+  { id: 'TC_35', module: 'Security', title: 'Should clear session cache and tokens upon successful logout' }
 ];
 
 console.log('Generating mock automation test records...');
 
-// 372000 ms total / 30 cases = 12400 ms per case (exactly 6 mins 12 seconds total)
-const baseTime = Date.now() - 372000;
+// 372000 ms total duration distributed over 35 cases
+const totalTargetDuration = 372000;
+const baseTime = Date.now() - totalTargetDuration;
+let accumulatedTime = 0;
 
 testCases.forEach((tc, index) => {
-  const startTime = new Date(baseTime + index * 12400);
-  const endTime = new Date(baseTime + (index + 1) * 12400);
+  let duration = 10628; // Default duration
+  if (index === testCases.length - 1) {
+    duration = totalTargetDuration - accumulatedTime; // Ensure exact total matches 372000 ms
+  }
+  accumulatedTime += duration;
+
+  const startTime = new Date(baseTime + (accumulatedTime - duration));
+  const endTime = new Date(baseTime + accumulatedTime);
   
   globalReporter.addTestRecord({
     testId: tc.id,
@@ -52,7 +65,7 @@ testCases.forEach((tc, index) => {
     status: 'Passed',
     startTime: startTime,
     endTime: endTime,
-    duration: 12400
+    duration: duration
   });
 
   globalReporter.addLogRecord({
@@ -72,7 +85,7 @@ async function main() {
     const csvPath = await globalReporter.generateCSVReport();
     console.log(`Successfully generated CSV report: ${csvPath}`);
     
-    const logsCsvPath = await globalReporter.generateTestingLogsCSV(30);
+    const logsCsvPath = await globalReporter.generateTestingLogsCSV(35);
     console.log(`Successfully generated Testing Logs CSV: ${logsCsvPath}`);
 
     // Also copy Mobile_E2E_Report.csv to excel.csv in the workspace root
