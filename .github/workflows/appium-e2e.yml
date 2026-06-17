@@ -39,9 +39,20 @@ jobs:
           cd appium-framework
           mkdir -p logs
           appium --port 4723 --log-no-colors-theme > logs/appium-server.log 2>&1 &
-          echo "Waiting for Appium server to start..."
-          until curl -s http://127.0.0.1:4723/status > /dev/null; do sleep 2; done
-          echo "Appium server is up!"
+          echo "Waiting for Appium server to start (20s timeout)..."
+          for i in {1..10}; do
+            if curl -s http://127.0.0.1:4723/status > /dev/null; then
+              echo "Appium server is up!"
+              break
+            fi
+            sleep 2
+          done
+          if ! curl -s http://127.0.0.1:4723/status > /dev/null; then
+            echo "Warning: Appium server failed to start within 20 seconds."
+            echo "=== Appium Logs ==="
+            cat logs/appium-server.log || true
+            echo "==================="
+          fi
           npm test || true
         env:
           USE_APK: 'false'
