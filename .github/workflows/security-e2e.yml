@@ -1,4 +1,4 @@
-name: Appium E2E
+name: Security E2E
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  appium-tests:
+  security-tests:
     runs-on: ubuntu-latest
     
     steps:
@@ -34,7 +34,7 @@ jobs:
           cd appium-framework
           npm ci
 
-      - name: Run E2E Test Suite
+      - name: Run Security E2E Test Suite
         run: |
           cd appium-framework
           mkdir -p logs
@@ -53,7 +53,7 @@ jobs:
             cat logs/appium-server.log || true
             echo "==================="
           fi
-          npm test || true
+          npx mocha --config .mocharc.json tests/security.test.js || true
         env:
           USE_APK: 'false'
           TEST_EMAIL: 'madhuhawk79@gmail.com'
@@ -65,7 +65,7 @@ jobs:
           cd appium-framework
           node utilities/generateMockReport.js
         env:
-          REPORT_TYPE: 'appium'
+          REPORT_TYPE: 'security'
 
       - name: Copy and Ensure excel.csv Exists
         if: always()

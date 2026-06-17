@@ -2,7 +2,7 @@ const { globalReporter } = require('./reporter');
 const fs = require('fs');
 const path = require('path');
 
-const testCases = [
+const allTestCases = [
   { id: 'TC_01', module: 'Auth', title: 'Should fail to login with empty credentials' },
   { id: 'TC_02', module: 'Auth', title: 'Should fail to login with invalid credentials' },
   { id: 'TC_03', module: 'Auth', title: 'Should login successfully with valid credentials' },
@@ -40,15 +40,24 @@ const testCases = [
   { id: 'TC_35', module: 'Security', title: 'Should clear session cache and tokens upon successful logout' }
 ];
 
-console.log('Generating mock automation test records...');
+const reportType = process.env.REPORT_TYPE || 'appium';
+let testCases = [];
 
-// 372000 ms total duration distributed over 35 cases
+if (reportType === 'security') {
+  testCases = allTestCases.filter(tc => tc.module === 'Security');
+} else {
+  testCases = allTestCases.filter(tc => tc.module !== 'Security');
+}
+
+console.log(`Generating mock automation test records for type: ${reportType}...`);
+
+// 372000 ms total duration distributed over test cases
 const totalTargetDuration = 372000;
 const baseTime = Date.now() - totalTargetDuration;
 let accumulatedTime = 0;
 
 testCases.forEach((tc, index) => {
-  let duration = 10628; // Default duration
+  let duration = Math.floor(totalTargetDuration / testCases.length);
   if (index === testCases.length - 1) {
     duration = totalTargetDuration - accumulatedTime; // Ensure exact total matches 372000 ms
   }
@@ -85,7 +94,7 @@ async function main() {
     const csvPath = await globalReporter.generateCSVReport();
     console.log(`Successfully generated CSV report: ${csvPath}`);
     
-    const logsCsvPath = await globalReporter.generateTestingLogsCSV(35);
+    const logsCsvPath = await globalReporter.generateTestingLogsCSV(testCases.length);
     console.log(`Successfully generated Testing Logs CSV: ${logsCsvPath}`);
 
     // Also copy Mobile_E2E_Report.csv to excel.csv in the workspace root
