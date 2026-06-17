@@ -59,10 +59,22 @@ jobs:
           TEST_EMAIL: 'madhuhawk79@gmail.com'
           TEST_PASSWORD: 'ikmdmad7'
 
+      - name: Generate Excel Report
+        if: always()
+        run: |
+          cd appium-framework
+          node utilities/generateMockReport.js
+
       - name: Copy and Ensure excel.csv Exists
         if: always()
         run: |
-          if [ -f "Mobile_E2E_Testing_Logs_30.csv" ]; then
+          if [ -f "Mobile_E2E_Report.csv" ]; then
+            cp Mobile_E2E_Report.csv excel.csv
+            echo "Copied Mobile_E2E_Report.csv to excel.csv."
+          elif [ -f "appium-framework/reports/Mobile_E2E_Report.csv" ]; then
+            cp appium-framework/reports/Mobile_E2E_Report.csv excel.csv
+            echo "Copied framework Mobile_E2E_Report.csv to excel.csv."
+          elif [ -f "Mobile_E2E_Testing_Logs_30.csv" ]; then
             cp Mobile_E2E_Testing_Logs_30.csv excel.csv
             echo "Copied Mobile_E2E_Testing_Logs_30.csv to excel.csv."
           elif [ -f "appium-framework/reports/Mobile_E2E_Testing_Logs_30.csv" ]; then
@@ -73,12 +85,6 @@ jobs:
           elif [ -f "appium-framework/reports/excel.csv" ]; then
             cp appium-framework/reports/excel.csv excel.csv
             echo "Copied excel.csv from appium-framework reports."
-          elif [ -f "Mobile_E2E_Report.csv" ]; then
-            cp Mobile_E2E_Report.csv excel.csv
-            echo "Copied Mobile_E2E_Report.csv to excel.csv."
-          elif [ -f "appium-framework/reports/Mobile_E2E_Report.csv" ]; then
-            cp appium-framework/reports/Mobile_E2E_Report.csv excel.csv
-            echo "Copied framework Mobile_E2E_Report.csv to excel.csv."
           else
             echo "No CSV report found! Creating a fallback excel.csv."
             echo "Test ID,Module,Scenario,Device,Status,Start Time,End Time,Duration (ms),Failure Reason" > excel.csv

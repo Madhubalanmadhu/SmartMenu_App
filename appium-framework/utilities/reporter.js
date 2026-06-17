@@ -65,18 +65,29 @@ class Reporter {
       { header: 'Failed', key: 'failed', width: 10 },
       { header: 'Skipped', key: 'skipped', width: 10 },
       { header: 'Pass Percentage', key: 'passPercentage', width: 18 },
-      { header: 'Execution Duration (ms)', key: 'duration', width: 25 }
+      { header: 'Execution Duration', key: 'duration', width: 25 }
     ];
 
     const totalTests = this.tests.length;
     const passed = this.tests.filter(t => t.status.toLowerCase() === 'passed').length;
     const failed = this.tests.filter(t => t.status.toLowerCase() === 'failed').length;
     const skipped = this.tests.filter(t => t.status.toLowerCase() === 'skipped').length;
-    const passPercentage = totalTests > 0 ? `${Math.round((passed / totalTests) * 100)}%` : '0%';
+    const passPercentage = totalTests > 0 ? `${((passed / totalTests) * 100).toFixed(2)}%` : '0.00%';
     const totalDuration = this.tests.reduce((acc, t) => acc + t.duration, 0);
 
+    // Format duration from milliseconds to hh:mm:ss
+    const totalDurationSeconds = Math.floor(totalDuration / 1000);
+    const hours = Math.floor(totalDurationSeconds / 3600);
+    const minutes = Math.floor((totalDurationSeconds % 3600) / 60);
+    const seconds = totalDurationSeconds % 60;
+    const formattedDuration = [
+      String(hours).padStart(2, '0'),
+      String(minutes).padStart(2, '0'),
+      String(seconds).padStart(2, '0')
+    ].join(':');
+
     summarySheet.addRow({
-      execDate: new Date().toLocaleString(),
+      execDate: new Date().toLocaleString('en-US', { hour12: true }),
       deviceName,
       androidVersion,
       totalTests,
@@ -84,7 +95,7 @@ class Reporter {
       failed,
       skipped,
       passPercentage,
-      duration: totalDuration
+      duration: formattedDuration
     });
 
     // Style summary headers
