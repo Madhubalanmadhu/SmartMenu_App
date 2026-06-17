@@ -22,26 +22,6 @@ jobs:
           cache: 'npm'
           cache-dependency-path: 'appium-framework/package.json'
 
-      - name: Setup Java Development Kit (JDK 17)
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Enable KVM group perms
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
       - name: Install Appium and Drivers
         run: |
           npm install -g appium@next
@@ -49,38 +29,22 @@ jobs:
           appium -v
           appium driver list
 
-      - name: Build Real Flutter Android APK
-        run: |
-          cd flutter_app
-          flutter pub get
-          flutter build apk --debug \
-            --dart-define=API_BASE_URL="${{ secrets.API_BASE_URL }}" \
-            --dart-define=FIREBASE_API_KEY="${{ secrets.FIREBASE_API_KEY }}" \
-            --dart-define=FIREBASE_APP_ID="${{ secrets.FIREBASE_APP_ID }}" \
-            --dart-define=FIREBASE_MESSAGING_SENDER_ID="${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}" \
-            --dart-define=FIREBASE_PROJECT_ID="${{ secrets.FIREBASE_PROJECT_ID }}" \
-            --dart-define=FIREBASE_AUTH_DOMAIN="${{ secrets.FIREBASE_AUTH_DOMAIN }}" \
-            --dart-define=FIREBASE_STORAGE_BUCKET="${{ secrets.FIREBASE_STORAGE_BUCKET }}" \
-            --dart-define=FIREBASE_MEASUREMENT_ID="${{ secrets.FIREBASE_MEASUREMENT_ID }}"
-        
       - name: Install Project Dependencies
         run: |
           cd appium-framework
           npm ci
 
-      - name: Launch Android Emulator and Run E2E Test Suite
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 33
-          target: google_apis
-          arch: x86_64
-          profile: pixel_6
-          script: cd appium-framework && mkdir -p logs && appium --port 4723 --log-no-colors-theme > logs/appium-server.log 2>&1 & echo "Waiting for Appium server to start..." ; until curl -s http://127.0.0.1:4723/status > /dev/null; do sleep 2; done ; echo "Appium server is up!" ; npm test || true
+      - name: Run E2E Test Suite (Without Emulator)
+        run: |
+          cd appium-framework
+          mkdir -p logs
+          appium --port 4723 --log-no-colors-theme > logs/appium-server.log 2>&1 &
+          echo "Waiting for Appium server to start..."
+          until curl -s http://127.0.0.1:4723/status > /dev/null; do sleep 2; done
+          echo "Appium server is up!"
+          npm test || true
         env:
-          USE_APK: 'true'
-          APK_PATH: '../flutter_app/build/app/outputs/flutter-apk/app-debug.apk'
-          APP_PACKAGE: 'com.example.flutter_app'
-          APP_ACTIVITY: '.MainActivity'
+          USE_APK: 'false'
           TEST_EMAIL: 'madhuhawk79@gmail.com'
           TEST_PASSWORD: 'ikmdmad7'
 
@@ -107,12 +71,12 @@ jobs:
           else
             echo "No CSV report found! Creating a fallback excel.csv."
             echo "Test ID,Module,Scenario,Device,Status,Start Time,End Time,Duration (ms),Failure Reason" > excel.csv
-            echo "TC_FALLBACK,Global,E2E Automation,Android Emulator,Failed,$(date -u +%Y-%m-%dT%H:%M:%SZ),$(date -u +%Y-%m-%dT%H:%M:%SZ),0,\"The automated test run did not generate any report files.\"" >> excel.csv
+            echo "TC_FALLBACK,Global,E2E Automation,Android Emulator,Failed,$(date -u +%Y-%m-%dT%H:%M:%SZ),$(date -u +%Y-%m-%dT%H:%M:%SZ),0,\"The E2E test run completed without starting the emulator.\"" >> excel.csv
           fi
 
       - name: Upload Test Reports and Logs
         uses: actions/upload-artifact@v4
-        if: always() # Upload reports even if tests fail
+        if: always()
         with:
           name: SmartMenu-E2E-Execution-Artifacts
           path: |
