@@ -174,7 +174,7 @@ after(async function() {
     const version = process.env.ANDROID_VERSION || '13';
     await globalReporter.generateExcelReport(device, version);
     await globalReporter.generateCSVReport();
-    await globalReporter.generateTestingLogsCSV(30);
+    await globalReporter.generateTestingLogsCSV(globalReporter.tests.length || 30);
   } catch (error) {
     logger.error(`Failed to write Reports: ${error.message}`);
   }
