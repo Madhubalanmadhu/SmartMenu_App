@@ -22,8 +22,12 @@ void main() async {
   // Initialize Firebase
   Object? firebaseInitializationError;
   try {
+    final options = DefaultFirebaseOptions.currentPlatform;
+    if (options.apiKey.isEmpty || options.apiKey.contains('YOUR_') || options.apiKey == 'null') {
+      throw Exception('Firebase API Key is empty or not configured. Please set your repository secrets.');
+    }
     await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
+      options: options,
     );
     if (kIsWeb) {
       await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
