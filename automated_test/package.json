@@ -1,11 +1,1 @@
-{
-  "name": "automated_tests",
-  "version": "1.0.0",
-  "description": "Appium automation UI tests",
-  "main": "run_tests.js",
-  "dependencies": {
-    "chromedriver": "^148.0.1",
-    "exceljs": "^4.4.0",
-    "selenium-webdriver": "^4.44.0"
-  }
-}
+{"name": "automated_tests", "version": "1.0.0", "description": "Appium automation UI tests", "main": "run_tests.js", "dependencies": { "exceljs": "^4.4.0", "selenium-webdriver": "^4.44.0" }}
