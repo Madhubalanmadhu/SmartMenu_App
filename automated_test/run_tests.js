@@ -283,6 +283,8 @@ async function main() {
 
     // 4. Validate Dashboard Metrics
     try {
+      console.log('[~] Waiting 8 seconds for dashboard metrics to load...');
+      await driver.sleep(8000);
       console.log('[~] Verifying dashboard metric cards...');
       const source = await driver.getPageSource();
       if (source.includes('Total Revenue') && source.includes('Units Sold') && source.includes('Waste Units')) {
