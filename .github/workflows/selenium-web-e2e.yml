@@ -1,0 +1,61 @@
+name: Selenium Web E2E
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  selenium-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+          cache-dependency-path: 'automated_test/package-lock.json'
+
+      - name: Install Project Dependencies
+        run: |
+          cd automated_test
+          npm ci
+
+      - name: Run Web E2E Test Suite
+        run: |
+          cd automated_test
+          node run_tests.js
+
+      - name: Copy and Ensure excel.csv Exists
+        if: always()
+        run: |
+          if [ -f "automated_test/Web_E2E_Report.csv" ]; then
+            cp automated_test/Web_E2E_Report.csv excel.csv
+            echo "Copied Web_E2E_Report.csv to excel.csv."
+          elif [ -f "excel_web.csv" ]; then
+            cp excel_web.csv excel.csv
+            echo "Copied excel_web.csv to excel.csv."
+          else
+            echo "No CSV report found! Creating a fallback excel.csv."
+            echo "Test ID,Module,Scenario,Device,Status,Start Time,End Time,Duration (ms),Failure Reason" > excel.csv
+            echo "TC_FALLBACK,Web,E2E Automation,Chrome Browser,Failed,$(date -u +%Y-%m-%dT%H:%M:%SZ),$(date -u +%Y-%m-%dT%H:%M:%SZ),0,\"The Web E2E test run completed without outputting logs.\"" >> excel.csv
+          fi
+
+      - name: Upload Test Reports and Logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: SmartMenu-Web-E2E-Execution-Artifacts
+          path: |
+            excel.csv
+            automated_test/Web_E2E_Report.xlsx
+            automated_test/Web_E2E_Report.csv
+            automated_test/screenshots/
+            automated_test/report.json
+          retention-days: 14
