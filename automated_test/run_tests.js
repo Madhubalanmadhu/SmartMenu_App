@@ -222,7 +222,7 @@ async function main() {
     try {
       console.log('[~] Checking empty login warnings...');
       const loginButton = await driver.findElement(By.xpath('//flt-semantics[@role="button" and contains(text(), "Login to Dashboard")]'));
-      await loginButton.click();
+      await driver.executeScript("arguments[0].click();", loginButton);
       await driver.sleep(2000);
 
       const shotEmpty = await driver.takeScreenshot();
@@ -243,16 +243,18 @@ async function main() {
     try {
       console.log('[~] Typing email into input...');
       const emailField = await driver.findElement(By.css('input[aria-label="Email"]'));
+      await driver.executeScript("arguments[0].focus();", emailField);
       await emailField.sendKeys(config.testEmail);
 
       console.log('[~] Typing password...');
       const passwordField = await driver.findElement(By.css('input[aria-label="Password"]'));
+      await driver.executeScript("arguments[0].focus();", passwordField);
       await passwordField.sendKeys(config.testPassword);
       await driver.sleep(1000);
 
       console.log('[~] Clicking Login button...');
       const loginButton = await driver.findElement(By.xpath('//flt-semantics[@role="button" and contains(text(), "Login to Dashboard")]'));
-      await loginButton.click();
+      await driver.executeScript("arguments[0].click();", loginButton);
 
       console.log('[~] Waiting 15 seconds for API response and redirection...');
       await driver.sleep(15000);
@@ -287,7 +289,7 @@ async function main() {
       await driver.sleep(8000);
       console.log('[~] Verifying dashboard metric cards...');
       const source = await driver.getPageSource();
-      if (source.includes('Total Revenue') && source.includes('Units Sold') && source.includes('Waste Units')) {
+      if (source.includes('TOTAL REVENUE') && source.includes('UNITS SOLD') && source.includes('WASTE UNITS')) {
         dashboardSuccess = true;
         console.log('[+] Dashboard metrics and cards verified successfully.');
       } else {
@@ -306,7 +308,7 @@ async function main() {
       // Click Menu tab
       console.log('[~] Navigating to Menu Tab...');
       const menuTab = await driver.findElement(By.xpath('//flt-semantics[@role="button" and contains(text(), "Menu")]'));
-      await menuTab.click();
+      await driver.executeScript("arguments[0].click();", menuTab);
       await driver.sleep(3000);
       const shotMenu = await driver.takeScreenshot();
       fs.writeFileSync(path.join(screenshotDir, 'nav_menu.png'), shotMenu, 'base64');
@@ -314,7 +316,7 @@ async function main() {
       // Click Sales tab
       console.log('[~] Navigating to Sales Tab...');
       const salesTab = await driver.findElement(By.xpath('//flt-semantics[@role="button" and contains(text(), "Sales")]'));
-      await salesTab.click();
+      await driver.executeScript("arguments[0].click();", salesTab);
       await driver.sleep(3000);
       const shotSales = await driver.takeScreenshot();
       fs.writeFileSync(path.join(screenshotDir, 'nav_sales.png'), shotSales, 'base64');
@@ -322,7 +324,7 @@ async function main() {
       // Click Insights/Analytics tab
       console.log('[~] Navigating to Insights Tab...');
       const insightsTab = await driver.findElement(By.xpath('//flt-semantics[@role="button" and contains(text(), "Insights")]'));
-      await insightsTab.click();
+      await driver.executeScript("arguments[0].click();", insightsTab);
       await driver.sleep(3000);
       const shotAnalytics = await driver.takeScreenshot();
       fs.writeFileSync(path.join(screenshotDir, 'nav_analytics.png'), shotAnalytics, 'base64');
@@ -330,7 +332,7 @@ async function main() {
       // Click Waste tab
       console.log('[~] Navigating to Waste Tab...');
       const wasteTab = await driver.findElement(By.xpath('//flt-semantics[@role="button" and contains(text(), "Waste")]'));
-      await wasteTab.click();
+      await driver.executeScript("arguments[0].click();", wasteTab);
       await driver.sleep(3000);
       const shotWaste = await driver.takeScreenshot();
       fs.writeFileSync(path.join(screenshotDir, 'nav_waste.png'), shotWaste, 'base64');
@@ -338,7 +340,7 @@ async function main() {
       // Return to Dashboard tab
       console.log('[~] Navigating back to Dashboard Tab...');
       const dashTab = await driver.findElement(By.xpath('//flt-semantics[@role="button" and contains(text(), "Dashboard")]'));
-      await dashTab.click();
+      await driver.executeScript("arguments[0].click();", dashTab);
       await driver.sleep(3000);
       const shotDashboard = await driver.takeScreenshot();
       fs.writeFileSync(path.join(screenshotDir, 'nav_dashboard.png'), shotDashboard, 'base64');
@@ -360,7 +362,7 @@ async function main() {
     try {
       console.log('[~] Clicking Logout button in header...');
       const logoutButton = await driver.findElement(By.xpath('//flt-semantics[@role="button" and contains(text(), "Logout")]'));
-      await logoutButton.click();
+      await driver.executeScript("arguments[0].click();", logoutButton);
       await driver.sleep(5000);
 
       const shotLogout = await driver.takeScreenshot();
