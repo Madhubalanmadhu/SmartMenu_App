@@ -28,6 +28,8 @@ jobs:
           npm ci
 
       - name: Run Web E2E Test Suite
+        env:
+          BASE_URL: https://madhubalanmadhu.github.io/SmartMenu_App/
         run: |
           cd automated_test
           node run_tests.js
