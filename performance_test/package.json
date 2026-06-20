@@ -1,0 +1,12 @@
+{
+  "name": "performance_test",
+  "version": "1.0.0",
+  "description": "Baseline load testing suite for SmartMenu API",
+  "main": "load_test.js",
+  "scripts": {
+    "test": "node load_test.js"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0"
+  }
+}

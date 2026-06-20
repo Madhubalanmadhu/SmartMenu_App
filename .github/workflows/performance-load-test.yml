@@ -1,0 +1,105 @@
+name: Performance Load Test
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  performance-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python Dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+
+      - name: Start FastAPI Backend
+        run: |
+          cd backend
+          # Run database migrations / table creation
+          python -c "from main import app"
+          # Run backend in the background
+          python main.py > backend.log 2>&1 &
+          echo "FastAPI backend started in background."
+
+      - name: Wait for Backend to be Ready
+        run: |
+          echo "Waiting for FastAPI server to start (30s timeout)..."
+          for i in {1..15}; do
+            if curl -s http://localhost:8000/ > /dev/null; then
+              echo "FastAPI backend is up and running!"
+              break
+            fi
+            sleep 2
+          done
+          if ! curl -s http://localhost:8000/ > /dev/null; then
+            echo "Error: FastAPI backend failed to respond within 30 seconds."
+            echo "=== Backend Logs ==="
+            cat backend/backend.log || true
+            echo "===================="
+            exit 1
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+          cache-dependency-path: 'performance_test/package.json'
+
+      - name: Install Performance Test Dependencies
+        run: |
+          cd performance_test
+          npm install
+
+      - name: Run Baseline Load Test
+        env:
+          TARGET_URL: http://localhost:8000/
+          CONCURRENCY: 100
+          DURATION_MS: 60000
+          WARMUP_DURATION_MS: 2000
+        run: |
+          cd performance_test
+          npm test
+
+      - name: Copy and Ensure excel.csv Exists
+        if: always()
+        run: |
+          if [ -f "Load_Test_Report.csv" ]; then
+            cp Load_Test_Report.csv excel.csv
+            echo "Copied Load_Test_Report.csv to excel.csv."
+          elif [ -f "performance_test/Load_Test_Report.csv" ]; then
+            cp performance_test/Load_Test_Report.csv excel.csv
+            echo "Copied performance_test/Load_Test_Report.csv to excel.csv."
+          else
+            echo "No CSV report found! Creating a fallback excel.csv."
+            echo "Test ID,Module,Scenario,Device,Status,Start Time,End Time,Duration (ms),Failure Reason" > excel.csv
+            echo "TC_FALLBACK,Performance,Load Test Execution,Node.js Load Runner,Failed,$(date -u +%Y-%m-%dT%H:%M:%SZ),$(date -u +%Y-%m-%dT%H:%M:%SZ),0,\"The baseline load test run completed without outputting logs.\"" >> excel.csv
+          fi
+
+      - name: Upload Test Reports and Logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: SmartMenu-Performance-Load-Test-Artifacts
+          path: |
+            excel.csv
+            Load_Test_Report.xlsx
+            Load_Test_Report.csv
+            performance_test/Load_Test_Report.xlsx
+            performance_test/Load_Test_Report.csv
+            backend/backend.log
+          retention-days: 14
