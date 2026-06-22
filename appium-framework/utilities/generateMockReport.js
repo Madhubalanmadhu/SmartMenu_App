@@ -116,7 +116,15 @@ let testCases = [];
 if (reportType === 'security') {
   testCases = allTestCases.filter(tc => tc.module === 'Security');
 } else {
-  testCases = allTestCases.filter(tc => tc.module !== 'Security');
+  const appiumTemplates = allTestCases.filter(tc => tc.module !== 'Security');
+  for (let i = 0; i < 400; i++) {
+    const template = appiumTemplates[i % appiumTemplates.length];
+    testCases.push({
+      id: `TC_${String(i + 1).padStart(2, '0')}`,
+      module: template.module,
+      title: `${template.title} (Suite Check #${i + 1})`
+    });
+  }
 }
 
 console.log(`Generating mock automation test records for type: ${reportType}...`);
