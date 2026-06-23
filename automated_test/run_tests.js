@@ -143,10 +143,12 @@ async function main() {
   }
 
   const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  const testEmail = process.env.TEST_EMAIL || config.testEmail;
+  const testPassword = process.env.TEST_PASSWORD || config.testPassword;
   const baseUrl = process.env.BASE_URL || config.baseUrl;
   console.log('[+] Target Configuration:');
   console.log(`    Base URL:      ${baseUrl}`);
-  console.log(`    Test Email:    ${config.testEmail}`);
+  console.log(`    Test Email:    ${testEmail}`);
 
   let driver;
   const startTime = Date.now();
@@ -254,12 +256,12 @@ async function main() {
       console.log('[~] Typing email into input...');
       const emailField = await driver.findElement(By.css('input[aria-label="Email"]'));
       await driver.executeScript("arguments[0].focus();", emailField);
-      await emailField.sendKeys(config.testEmail);
+      await emailField.sendKeys(testEmail);
 
       console.log('[~] Typing password...');
       const passwordField = await driver.findElement(By.css('input[aria-label="Password"]'));
       await driver.executeScript("arguments[0].focus();", passwordField);
-      await passwordField.sendKeys(config.testPassword);
+      await passwordField.sendKeys(testPassword);
       await driver.sleep(1000);
 
       console.log('[~] Clicking Login button...');

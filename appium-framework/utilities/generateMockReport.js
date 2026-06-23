@@ -114,7 +114,15 @@ const reportType = process.env.REPORT_TYPE || 'appium';
 let testCases = [];
 
 if (reportType === 'security') {
-  testCases = allTestCases.filter(tc => tc.module === 'Security');
+  const securityTemplates = allTestCases.filter(tc => tc.module === 'Security');
+  for (let i = 0; i < 400; i++) {
+    const template = securityTemplates[i % securityTemplates.length];
+    testCases.push({
+      id: `TC_${String(i + 1).padStart(2, '0')}`,
+      module: 'Security',
+      title: `${template.title} (Suite Check #${i + 1})`
+    });
+  }
 } else {
   const appiumTemplates = allTestCases.filter(tc => tc.module !== 'Security');
   for (let i = 0; i < 400; i++) {
